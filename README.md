@@ -1,0 +1,1 @@
+Projek ini adalah projek untuk menyimpan berbagai dokumentasi AGENTS.md dan Agents skill untuk keperluan aplikasi saya nantinya.
