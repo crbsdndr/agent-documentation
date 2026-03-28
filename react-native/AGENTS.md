@@ -2,149 +2,177 @@
 
 React Native-specific rules for this codebase. Overrides global `~/AGENTS.md`.
 
-> This file is **living documentation** — rules here can and should evolve over time. When a user's request conflicts with an existing rule, discuss the conflict, and if needed, update this file to reflect the new convention. When refactoring or improving the codebase reveals a bad pattern, **proactively add or update the relevant rule** here so it doesn't happen again.
+> This file contains only React Native-specific conventions. Do not repeat generic global rules here unless they need a stricter or more concrete React Native interpretation.
 
 ---
 
-## TYPESCRIPT RULES
+## TYPESCRIPT
 
-- Never use `any` — use `unknown` and narrow the type if needed.
-- Avoid non-null assertions (`!`) — handle nullability explicitly.
-- Always type function return values explicitly.
-- Use `type` for object shapes, `interface` only when extending.
-- Never cast with `as` unless absolutely necessary.
+- MUST never use `any`; use `unknown` and narrow it properly.
+- MUST type function parameters and return values explicitly.
+- MUST handle `null` and `undefined` intentionally.
+- MUST prefer `type` for object shapes; use `interface` only when extension or declaration merging is needed.
+- SHOULD avoid non-null assertions (`!`).
+- SHOULD avoid `as` casting unless there is no safer alternative.
+- SHOULD keep types close to the feature that owns them.
 
-## FRAMEWORK RULES
+---
 
-- Use **Expo** as the default toolchain unless the project explicitly uses bare React Native.
-- Use **React Navigation** for routing — follow its stack, tab, and drawer navigator conventions.
-- Never use `index.js` as a component file — name files after what they export.
-- Prefer **named exports** over default exports, except for screens.
-- Use **absolute imports** with `@/` alias.
+## TOOLCHAIN
 
-## PLATFORM RULES
+- MUST use **Expo** as the default toolchain unless the project explicitly requires bare React Native.
+- MUST keep project configuration aligned with the chosen toolchain.
+- SHOULD prefer Expo-supported libraries before adding custom native complexity.
+- SHOULD document clearly when the project cannot use Expo defaults.
 
-- Never assume iOS and Android behave the same — always test both.
-- Use `Platform.OS` to handle platform-specific logic, or `.ios.tsx` / `.android.tsx` file extensions for platform-specific components.
-- Use `Platform.select()` for platform-specific styles.
-- Never hardcode pixel values — use `Dimensions` or responsive utilities.
+---
 
-## NAMING CONVENTION
+## PROJECT STRUCTURE
 
-- **Components & Screens** → PascalCase (`UserCard.tsx`, `HomeScreen.tsx`)
-- **Files & folders** → kebab-case (`user-card.tsx`, `auth-utils.ts`)
-- **Variables & functions** → camelCase (`getUserData`)
-- **Constants** → UPPER_SNAKE_CASE (`MAX_RETRY_COUNT`)
-- **Types & interfaces** → PascalCase (`UserProps`)
-- **Boolean variables** → prefix with `is`, `has`, or `can` (`isLoading`, `hasError`)
-- **Screens** → suffix with `Screen` (`HomeScreen`, `ProfileScreen`)
+- MUST group code by feature, not by technical type.
+- MUST keep navigation code in a dedicated `@/navigation` area.
+- MUST use absolute imports with the `@/` alias.
+- MUST name files after what they export.
+- SHOULD keep one component per file.
+- SHOULD keep components small and focused.
+- SHOULD keep feature-specific logic inside the feature until reuse is proven.
+- SHOULD move shared business logic into hooks, services, or `@/lib` instead of UI components.
 
-## MODULARITY RULES
+---
 
-- One component per file — no multiple component exports in a single file.
-- Keep components **small and focused** — if it does more than one thing, split it.
-- Separate concerns: UI logic stays in components, business logic goes to `@/lib` or `@/hooks`.
-- Group by feature, not by type — `@/features/auth/` instead of `@/screens/` + `@/components/`.
+## NAMING
 
-## REUSE RULES
+- MUST use PascalCase for components, screens, and types.
+- MUST use camelCase for variables and functions.
+- MUST use UPPER_SNAKE_CASE for constants.
+- MUST prefix boolean variables with `is`, `has`, or `can`.
+- MUST suffix screen components with `Screen`.
+- SHOULD use kebab-case for folders and non-component file names when the project convention follows it.
+- SHOULD keep naming consistent across each feature.
 
-- Before building a new component, **check `@/components`** first.
-- Before writing a utility function, **check `@/lib`** first.
-- Extract repeated logic (3+ usages) into a shared hook or utility.
+---
 
-## STYLING RULES
+## PLATFORM
 
-- Always use `StyleSheet.create()` — never use inline style objects.
-- Never hardcode colors — use a theme/token system (`@/theme/colors`).
-- Avoid deeply nested `View` components — flatten layout where possible.
-- Use `flex` for layout — avoid fixed widths/heights unless necessary.
+- MUST assume iOS and Android can behave differently.
+- MUST isolate platform-specific behavior with `Platform.OS`, `Platform.select()`, or platform-specific files when needed.
+- MUST keep platform-sensitive behavior explicit and localized.
+- SHOULD extract repeated platform branching into shared utilities.
+- SHOULD avoid spreading platform conditionals across unrelated files.
 
-## PERFORMANCE RULES
+---
 
-- Use `FlatList` or `FlashList` for long lists — never use `ScrollView` with `.map()`.
-- Memoize expensive components with `React.memo` and callbacks with `useCallback`.
-- Avoid anonymous functions in JSX — define them outside render.
-- Images must use a caching-aware library (e.g. `expo-image`) — never raw `<Image>` for remote URLs.
+## STYLING
 
-## SECURITY RULES
+- MUST use a shared design token or theme system for colors, spacing, typography, and radius values.
+- MUST prefer `StyleSheet.create()` for static and reusable styles.
+- MUST use flexbox as the default layout system.
+- SHOULD avoid deeply nested `View` hierarchies when a flatter layout is clearer.
+- SHOULD allow small inline styles only for simple dynamic values that do not belong in shared styles.
+- SHOULD use fixed spacing tokens by default and use screen dimensions only when layout truly depends on screen size.
 
-- Never store sensitive data (tokens, passwords) in `AsyncStorage` — use `expo-secure-store`.
-- Always validate and sanitize user input before processing.
-- Never expose API keys in the codebase — use environment variables via `expo-constants`.
+---
 
-## ERROR HANDLING RULES
+## SAFE AREA
 
-- Always wrap navigation actions in try/catch.
-- Use an **error boundary** at the root level to catch unexpected crashes.
-- Never let unhandled promise rejections fail silently.
+- MUST handle safe areas on all root screens.
+- MUST use `react-native-safe-area-context`.
+- MUST avoid hardcoded padding meant to simulate safe area behavior.
+- SHOULD use `useSafeAreaInsets()` when screen layout needs custom safe area control.
+- SHOULD keep safe area handling close to the screen boundary.
 
-## VERIFICATION RULES
+---
 
-- After changes, always verify using the project's available scripts:
-  - Lint — check for linting errors
-  - Typecheck — verify no TypeScript errors
-  - Run on both iOS and Android simulators before shipping
+## COMPONENTS
 
-## SAFE AREA RULES
+- MUST keep components focused on presentation and interaction.
+- MUST keep side effects out of render logic.
+- MUST prefer composition over prop-heavy mega components.
+- SHOULD extract reusable UI only after a clear reuse pattern exists.
+- SHOULD split components when they start handling too many responsibilities.
+- SHOULD check existing shared components, hooks, and utilities before introducing new React Native-specific abstractions.
+- MUST wrap critical screen trees with error boundaries to prevent full-app crashes.
+- MUST show a fallback UI instead of a white screen when a render error occurs.
 
-- Always wrap root screens with `SafeAreaView` or use `useSafeAreaInsets()` — never ignore notch, status bar, or bottom gesture area.
-- Never hardcode top/bottom padding to compensate for safe area — use `react-native-safe-area-context` instead.
+---
 
-## KEYBOARD RULES
+## LISTS AND IMAGES
 
-- Always wrap forms with `KeyboardAvoidingView` — behavior `padding` for iOS, `height` for Android.
-- Always handle keyboard dismiss on outside tap using `Keyboard.dismiss()`.
-- Use `keyboardShouldPersistTaps="handled"` on `ScrollView` that contains inputs.
+- MUST use `FlatList` or `FlashList` for long or dynamic lists.
+- MUST avoid rendering large collections with `ScrollView` plus `.map()`.
+- MUST use a caching-aware image solution for remote images.
+- MUST provide stable image sizing behavior to avoid layout jumps.
+- SHOULD use `expo-image` for remote images in Expo-based projects unless there is a documented reason not to.
+- SHOULD use placeholders, content fit, and caching intentionally.
+- SHOULD avoid unoptimized remote image rendering in scrolling screens.
 
-## ANIMATION RULES
+---
 
-- Use **react-native-reanimated** over the built-in `Animated` API — it runs on the UI thread and is significantly more performant.
-- Use **react-native-gesture-handler** for gesture-based interactions — never use built-in `PanResponder`.
-- Keep animations declarative with `useAnimatedStyle` and `useSharedValue`.
-- Never block the JS thread with heavy computations during animations.
+## NAVIGATION
 
-## NAVIGATION RULES
+- MUST use **React Navigation** conventions consistently.
+- MUST type route params explicitly using a shared param list pattern.
+- MUST pass only serializable navigation params.
+- MUST use the navigation API for screen transitions.
+- SHOULD use `navigate()` for normal flows and `replace()` when back navigation should not return to the previous screen.
+- SHOULD keep reusable navigation logic in helpers or hooks instead of scattering it across screens.
+- SHOULD handle unsaved changes explicitly before allowing destructive back navigation.
 
-- Use **React Navigation** — follow its stack, tab, and drawer navigator conventions.
-- Always type your navigation params using `RootStackParamList` pattern.
-- Never pass non-serializable values (functions, class instances) as navigation params.
-- Use `navigation.navigate()` for moving between screens, `navigation.replace()` when back navigation doesn't make sense (e.g. after login).
-- Keep navigation logic out of components — use a dedicated `@/navigation` folder.
+---
 
-## ACCESSIBILITY RULES
+## FORMS AND KEYBOARD
 
-- Every touchable element must have an `accessibilityLabel`.
-- Use `accessibilityRole` to describe the purpose of interactive elements (`button`, `link`, etc).
-- Never rely solely on color to convey information — always pair with text or icon.
+- MUST handle keyboard overlap for input-heavy screens.
+- MUST dismiss the keyboard intentionally when the UX calls for it.
+- MUST use `keyboardShouldPersistTaps="handled"` on scrollable forms containing inputs.
+- SHOULD use `KeyboardAvoidingView` where it improves usability.
+- SHOULD use platform-appropriate keyboard behavior instead of forcing identical behavior on iOS and Android.
+- SHOULD keep form state and validation predictable and explicit.
 
-## ANIMATION RULES
+---
 
-- Use **react-native-reanimated** over the built-in `Animated` API — it runs on the UI thread and is significantly more performant.
-- Never block the JS thread with animations — always use `useSharedValue` and `useAnimatedStyle`.
-- Keep animations subtle and purposeful — don't animate just for the sake of it.
+## STATE AND MEMORY
 
-## NAVIGATION RULES
+- MUST clean up subscriptions, timers, and listeners in `useEffect`.
+- MUST prevent state updates after a component unmounts.
+- MUST keep state minimal and derive values when possible.
+- SHOULD cancel or ignore outdated async work during cleanup.
+- SHOULD avoid storing large derived objects in component state.
 
-- Always type route params — never pass untyped `params`.
-- Never navigate by mutating state — always use the navigation API (`navigation.navigate`, `navigation.push`, etc).
-- Keep navigation logic out of components — abstract into a navigation service or hook when reused.
-- Always handle the back action explicitly on screens that have unsaved changes.
+---
 
-## MEMORY RULES
+## NETWORK
 
-- Always return a cleanup function from `useEffect` when subscribing to events, timers, or listeners.
-- Never update state on an unmounted component — cancel async operations on cleanup.
-- Avoid storing large objects in state — keep state minimal and derive what you can.
+- MUST handle offline-aware UX when the feature depends on network access.
+- MUST show meaningful UI when a network request fails.
+- MUST set request timeout or cancellation behavior.
+- SHOULD detect connectivity changes when the feature depends on live network availability.
+- SHOULD centralize API clients and request behavior instead of duplicating fetch logic.
+- SHOULD retry only when the operation is safe to retry.
 
-## GESTURE RULES
+---
 
-- Always use **react-native-gesture-handler** touchables (`TouchableOpacity`, `Pressable`) — never use the ones from `react-native` core in screens with navigation.
-- Wrap the root app with `GestureHandlerRootView`.
-- Never nest multiple swipeable/gesture components without explicit gesture priority handling.
+## CLIENT SECURITY
 
-## NETWORK RULES
+- MUST never store secrets, tokens, or sensitive credentials in plain `AsyncStorage`.
+- MUST use secure storage for sensitive client-side values.
+- SHOULD keep sensitive logic on the server whenever possible.
+- SHOULD minimize the amount of sensitive data stored on device.
 
-- Always handle offline state — never assume the user has a connection.
-- Always show a meaningful UI when a network request fails — never fail silently.
-- Use `@react-native-community/netinfo` to detect connectivity changes.
-- Always set request timeouts — never let requests hang indefinitely.
+---
+
+## REACT NATIVE VERIFICATION
+
+- MUST verify platform-sensitive flows on both iOS and Android before shipping.
+- MUST verify critical UI, navigation, keyboard, gesture, and safe-area behavior after meaningful changes.
+- SHOULD test on realistic device sizes when layout or interaction behavior is sensitive to screen dimensions.
+- SHOULD treat warnings that indicate real runtime or platform risk as problems to resolve.
+
+---
+
+## DYNAMIC RULES
+
+- MUST update this file when user instructions conflict with existing rules and the new behavior is better.
+- MUST NOT ignore recurring patterns that should become rules.
+- MUST keep updates minimal and actionable.
+- MUST NOT add vague, redundant, or one-off rules.

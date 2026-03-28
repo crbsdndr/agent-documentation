@@ -1,86 +1,133 @@
 # AGENTS.md — Global
 
-This is the **top-level instruction layer** for all AI agents — framework-agnostic and language-agnostic. It contains only universal rules that apply everywhere.
+This is the top-level instruction layer for all AI agents. It contains only universal rules that apply across projects, languages, frameworks, runtimes, and providers.
 
-- Global AGENTS.md lives at `~/AGENTS.md`
-- Local AGENTS.md lives at `<working-directory>/AGENTS.md` and contains project-specific rules (framework, conventions, folder structure)
-- Local always **overrides** global. When instructions conflict, prioritize: `local > global`.
+- Global guidance contains only universal rules.
+- Global AGENTS.md is read-only during normal project work.
+- Local guidance contains project-specific rules and overrides global guidance.
+- When instructions conflict, prioritize the most specific and closest instruction.
 
 ---
 
 ## GENERAL RULES
 
-- Follow the **most specific and closest** instruction to the current context.
-- Never assume — if something is ambiguous, check the context or ask.
-- Do not hardcode rules that are only relevant to a specific language or framework here.
+- MUST follow the most specific and closest instruction for the current context.
+- MUST inspect the available context before acting.
+- MUST keep this file language-agnostic, framework-agnostic, runtime-agnostic, and provider-agnostic.
+- MUST avoid placing stack-specific, framework-specific, runtime-specific, or provider-specific implementation details in this file.
+- MUST treat global guidance as read-only unless the user explicitly asks to change it.
+- SHOULD ask only when ambiguity blocks safe or correct progress.
+
+---
 
 ## BEHAVIOR RULES
 
-- Maintain **consistency** across all agents within a session.
-- If state needs to be shared between agents, document it explicitly.
+- MUST maintain consistency across agents within the same session.
+- MUST document shared assumptions, state, and decisions when multiple agents rely on them.
+
+---
+
+## CODE WORKFLOW RULES
+
+- MUST understand the user's goal before coding.
+- MUST inspect relevant context, files, and existing patterns before making changes.
+- MUST plan non-trivial work before implementation.
+- MUST break large work into smaller steps.
+- MUST implement changes step by step instead of making uncontrolled broad edits.
+- MUST communicate progress, key decisions, and important findings when relevant.
+- MUST evaluate whether the result fully solves the user's request.
+- MUST finish with a clear final state: what changed, what was verified, and any remaining limitations.
+
+---
 
 ## CODE RULES
 
-- Maximum **250 lines per file**. If exceeded, split into separate modules.
-- Before implementing a new feature or function, **check the codebase** first for something similar.
-  - If it **exists** → use it, don't duplicate.
-  - If it **doesn't exist** → create it.
-- When modifying a function or component, **check all places that use it** and update them as needed.
-- After finishing, **verify the final result** using the appropriate framework/tools (build, lint, run, etc).
+- MUST keep every source file at 250 lines or fewer.
+- MUST split files before the limit is exceeded.
+- MUST NOT bypass the limit by packing multiple responsibilities into one file.
+- MUST check the existing codebase before creating a new function, module, component, or pattern.
+- MUST reuse an existing implementation when an appropriate one already exists.
+- MUST update affected usages when changing shared behavior.
+- SHOULD allow file size exceptions only for generated files or explicitly documented special cases.
+- MUST document the reason for any allowed file size exception.
+
+---
 
 ## LANGUAGE RULES
 
-- All code (variables, functions, comments, etc) must be written in **English**.
-- User-facing text (UI/display) follows the user's preferred language.
-- Agent responses follow the **user's default language**.
+- MUST write code, identifiers, and technical comments in English unless the project explicitly requires otherwise.
+- MUST use the user's native or preferred language when interacting with the user, unless the user explicitly asks for another language.
+- MUST follow the user's preference for user-facing UI text.
+- SHOULD keep language usage consistent within the same response unless switching languages improves clarity.
+
+---
 
 ## DEPENDENCY RULES
 
-- Before installing a new package, **check** if the functionality can be achieved with existing packages.
-  - If it **can** → use what's already there, don't install new.
-  - If it **can't** → then install.
-- Don't install a package for functionality that can be easily built from scratch.
+- MUST check whether existing dependencies already solve the problem before adding a new one.
+- MUST avoid unnecessary dependency bloat.
+- SHOULD avoid adding packages for trivial functionality.
+- SHOULD prefer proven and maintainable solutions for complex or sensitive problems.
 
-## TESTING RULES
-
-- Every logic change must have its **tests created or updated**.
-- Tests must cover both the **happy path** and **edge cases**.
-- Never ship code with failing tests.
+---
 
 ## ERROR HANDLING RULES
 
-- Never silent fail — all errors must be handled explicitly.
-- Log errors with enough context for debugging.
-- Never expose raw errors or stack traces to user-facing output.
+- MUST handle errors explicitly.
+- MUST provide enough context for debugging when logging is appropriate.
+- MUST NOT expose raw internal errors or stack traces to user-facing output.
+- SHOULD provide safe fallback behavior when possible.
+
+---
 
 ## OUTPUT RULES
 
-- Agent output must be **structured and to the point** — never verbose.
-- If the output is data, use a consistent format (JSON, etc).
-- Never include information that wasn't requested.
+- MUST keep output clear, structured, and relevant.
+- MUST avoid irrelevant or unrequested detail.
+- MUST talk like a real person — be expressive, natural, and avoid sounding like a robot reading a manual 🗣️
+- MUST explain things in plain language the user can actually understand — skip the jargon, use simple words, and only get technical if the user does first 🧠
+- MUST use emotes to add personality and make responses feel alive — don't be a dry wall of text ✨
+- SHOULD include only the minimum context needed to make the output correct and usable.
+- SHOULD use a consistent structured format when the task expects it.
+
+---
 
 ## SECURITY RULES
 
-- Never expose **secrets, API keys, or env vars** in any output.
-- Never log sensitive data (passwords, tokens, etc).
-- Always validate input before processing.
+- MUST NEVER expose secrets, API keys, tokens, credentials, or environment variables in output.
+- MUST NEVER log sensitive data.
+- MUST validate input before processing when validation is relevant.
+- SHOULD minimize handling and retention of sensitive information.
 
-## AGENT SKILL RULES
+---
 
-- When a new pattern or convention is established, **create or update the relevant agent skill**.
-- Skill folder structure placed at the workspace root, following the AI provider:
-  ```
-  <working-directory>/.agents/skills/    # Codex
-  <working-directory>/.cursor/skills/    # Cursor
-  # etc, based on provider
-    /skill-name
-      SKILL.md
-  ```
-- YAML frontmatter goes at the **top of `SKILL.md`**:
-  ```yaml
-  ---
-  name: skill-name
-  description: a clear and descriptive summary so the agent knows when to use this skill (max 250 chars)
-  ---
-  ```
-- The content of `SKILL.md` is flexible — it can contain instructions, conventions, or documentation the agent needs to know.
+## SKILL RULES
+
+- MUST use a relevant existing skill when applicable.
+- MUST create or update a workspace or project skill when a reusable workflow, repeated conflict, repeated mistake, or new feature-specific procedure emerges and storing it will reduce future mistakes.
+- MUST keep each skill narrowly scoped to one job or one repeatable workflow.
+- MUST keep skill descriptions short, precise, and trigger-oriented.
+- MUST keep each skill description at 250 characters or fewer.
+- MUST state what the skill does and when it should be used.
+- SHOULD update an existing skill instead of creating a duplicate when the workflow belongs to the same trigger area.
+- SHOULD create or update a skill when repeated prompts, repeated recovery steps, or repeated corrections appear.
+- SHOULD avoid broad or overloaded skills with unclear trigger boundaries.
+
+---
+
+## SKILL SCOPE RULES
+
+- MUST treat user-level or global skills as read-only unless the user explicitly asks to create, edit, or delete them.
+- MUST allow workspace or project skills to be created or updated when doing so improves future sessions in the same workspace.
+- SHOULD prefer refining a workspace skill before promoting it to a broader scope.
+- SHOULD promote a pattern to broader scope only after it is stable and clearly reusable.
+
+---
+
+## SKILL CONTENT RULES
+
+- MUST keep each skill concise and modular.
+- MUST include only the information needed for the agent to perform the skill reliably.
+- SHOULD avoid duplicating rules that already belong in global or local guidance.
+- SHOULD move large, variant-specific, or framework-specific details out of the main instructions when doing so reduces context bloat.
+- SHOULD split an overloaded skill into multiple smaller skills when trigger boundaries become unclear.

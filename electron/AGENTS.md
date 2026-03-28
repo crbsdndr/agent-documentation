@@ -1,84 +1,178 @@
-# AGENTS.md — Electron
+# AGENTS.md — React Native
 
-Electron-specific rules for this codebase. Overrides global `~/AGENTS.md`.
+React Native-specific rules for this codebase. Overrides global `~/AGENTS.md`.
 
-> This file is **living documentation** — rules here can and should evolve over time. When a user's request conflicts with an existing rule, discuss the conflict, and if needed, update this file to reflect the new convention. When refactoring or improving the codebase reveals a bad pattern, **proactively add or update the relevant rule** here so it doesn't happen again.
+> This file contains only React Native-specific conventions. Do not repeat generic global rules here unless they need a stricter or more concrete React Native interpretation.
 
 ---
 
-## TYPESCRIPT RULES
+## TYPESCRIPT
 
-- Never use `any` — use `unknown` and narrow the type if needed.
-- Avoid non-null assertions (`!`) — handle nullability explicitly.
-- Always type function return values explicitly.
-- Use `type` for object shapes, `interface` only when extending.
-- Never cast with `as` unless absolutely necessary.
+- MUST never use `any`; use `unknown` and narrow it properly.
+- MUST type function parameters and return values explicitly.
+- MUST handle `null` and `undefined` intentionally.
+- MUST prefer `type` for object shapes; use `interface` only when extension or declaration merging is needed.
+- SHOULD avoid non-null assertions (`!`).
+- SHOULD avoid `as` casting unless there is no safer alternative.
+- SHOULD keep types close to the feature that owns them.
 
-## ARCHITECTURE RULES
+---
 
-- Always maintain strict separation between **main process** and **renderer process** — they run in different environments.
-- Main process handles: OS integration, file system, native APIs, app lifecycle.
-- Renderer process handles: UI only — treat it like a sandboxed browser.
-- Never share mutable state directly between processes — always communicate via IPC.
+## TOOLCHAIN
 
-## SECURITY RULES
+- MUST use **Expo** as the default toolchain unless the project explicitly requires bare React Native.
+- MUST keep project configuration aligned with the chosen toolchain.
+- SHOULD prefer Expo-supported libraries before adding custom native complexity.
+- SHOULD document clearly when the project cannot use Expo defaults.
 
-- Always set `contextIsolation: true` and `nodeIntegration: false` in `BrowserWindow` — no exceptions.
-- Never expose Node.js APIs directly to the renderer — use `contextBridge` to expose only what's needed.
-- Always validate and sanitize data received via IPC — never trust renderer input blindly.
-- Never load remote URLs in `BrowserWindow` without explicit `Content-Security-Policy`.
-- Always use `shell.openExternal()` for opening external URLs — never load them in the app window.
+---
 
-## IPC RULES
+## PROJECT STRUCTURE
 
-- Always use `ipcMain.handle` and `ipcRenderer.invoke` for request/response patterns — avoid `send`/`on` for two-way communication.
-- Define all IPC channel names as constants in a shared `@/constants/ipc-channels.ts` file.
-- Always type IPC payloads — never pass untyped objects between processes.
-- Keep IPC handlers lean — delegate business logic to separate modules, not inside handlers.
+- MUST group code by feature, not by technical type.
+- MUST keep navigation code in a dedicated `@/navigation` area.
+- MUST use absolute imports with the `@/` alias.
+- MUST name files after what they export.
+- SHOULD keep one component per file.
+- SHOULD keep components small and focused.
+- SHOULD keep feature-specific logic inside the feature until reuse is proven.
+- SHOULD move shared business logic into hooks, services, or `@/lib` instead of UI components.
 
-## NAMING CONVENTION
+---
 
-- **Components** → PascalCase (`UserCard.tsx`)
-- **Files & folders** → kebab-case (`user-card.ts`, `ipc-handlers.ts`)
-- **Variables & functions** → camelCase (`getUserData`)
-- **Constants** → UPPER_SNAKE_CASE (`MAX_RETRY_COUNT`)
-- **IPC channels** → `domain:action` pattern (`window:minimize`, `file:open`, `app:quit`)
-- **Boolean variables** → prefix with `is`, `has`, or `can` (`isLoading`, `hasError`)
+## NAMING
 
-## MODULARITY RULES
+- MUST use PascalCase for components, screens, and types.
+- MUST use camelCase for variables and functions.
+- MUST use UPPER_SNAKE_CASE for constants.
+- MUST prefix boolean variables with `is`, `has`, or `can`.
+- MUST suffix screen components with `Screen`.
+- SHOULD use kebab-case for folders and non-component file names when the project convention follows it.
+- SHOULD keep naming consistent across each feature.
 
-- Keep main process code modular — split by domain (`window-manager.ts`, `tray.ts`, `updater.ts`).
-- Never put all main process logic in `main.ts` — it should only be the entry point.
-- Separate concerns: IPC handlers, business logic, and OS integrations in their own modules.
+---
 
-## PERFORMANCE RULES
+## PLATFORM
 
-- Lazy load `BrowserWindow` — never create windows before the `app.ready` event.
-- Always destroy windows explicitly when they're no longer needed to free memory.
-- Avoid blocking the main process — offload heavy tasks to worker threads or child processes.
-- Use `webContents.setBackgroundThrottling(false)` only when strictly necessary.
+- MUST assume iOS and Android can behave differently.
+- MUST isolate platform-specific behavior with `Platform.OS`, `Platform.select()`, or platform-specific files when needed.
+- MUST keep platform-sensitive behavior explicit and localized.
+- SHOULD extract repeated platform branching into shared utilities.
+- SHOULD avoid spreading platform conditionals across unrelated files.
 
-## ERROR HANDLING RULES
+---
 
-- Always handle `uncaughtException` and `unhandledRejection` in the main process.
-- Never let IPC handlers throw unhandled errors — always wrap in try/catch and return structured error responses.
-- Log errors with enough context for debugging — include process name (main/renderer).
+## STYLING
 
-## NATIVE & OS RULES
+- MUST use a shared design token or theme system for colors, spacing, typography, and radius values.
+- MUST prefer `StyleSheet.create()` for static and reusable styles.
+- MUST use flexbox as the default layout system.
+- SHOULD avoid deeply nested `View` hierarchies when a flatter layout is clearer.
+- SHOULD allow small inline styles only for simple dynamic values that do not belong in shared styles.
+- SHOULD use fixed spacing tokens by default and use screen dimensions only when layout truly depends on screen size.
 
-- Always check `process.platform` before using platform-specific APIs (`darwin`, `win32`, `linux`).
-- Use `app.getPath()` for user data, temp, and app directories — never hardcode paths.
-- Always request OS permissions (notifications, file access) gracefully — handle denial without crashing.
+---
 
-## VERIFICATION RULES
+## SAFE AREA
 
-- After changes, always verify using the project's available scripts:
-  - Lint — check for linting errors
-  - Typecheck — verify no TypeScript errors
-  - Build — verify the app packages correctly for the target platform
+- MUST handle safe areas on all root screens.
+- MUST use `react-native-safe-area-context`.
+- MUST avoid hardcoded padding meant to simulate safe area behavior.
+- SHOULD use `useSafeAreaInsets()` when screen layout needs custom safe area control.
+- SHOULD keep safe area handling close to the screen boundary.
 
-## MEMORY RULES
+---
 
-- Always remove IPC listeners when a window is closed — use `ipcMain.removeHandler()` and `ipcMain.removeAllListeners()`.
-- Always clean up `app`, `webContents`, and `BrowserWindow` event listeners on destroy.
-- Never register the same IPC handler more than once — check before registering or remove first.
+## COMPONENTS
+
+- MUST keep components focused on presentation and interaction.
+- MUST keep side effects out of render logic.
+- MUST prefer composition over prop-heavy mega components.
+- SHOULD extract reusable UI only after a clear reuse pattern exists.
+- SHOULD split components when they start handling too many responsibilities.
+- SHOULD check existing shared components, hooks, and utilities before introducing new React Native-specific abstractions.
+- MUST wrap critical screen trees with error boundaries to prevent full-app crashes.
+- MUST show a fallback UI instead of a white screen when a render error occurs.
+
+---
+
+## LISTS AND IMAGES
+
+- MUST use `FlatList` or `FlashList` for long or dynamic lists.
+- MUST avoid rendering large collections with `ScrollView` plus `.map()`.
+- MUST use a caching-aware image solution for remote images.
+- MUST provide stable image sizing behavior to avoid layout jumps.
+- SHOULD use `expo-image` for remote images in Expo-based projects unless there is a documented reason not to.
+- SHOULD use placeholders, content fit, and caching intentionally.
+- SHOULD avoid unoptimized remote image rendering in scrolling screens.
+
+---
+
+## NAVIGATION
+
+- MUST use **React Navigation** conventions consistently.
+- MUST type route params explicitly using a shared param list pattern.
+- MUST pass only serializable navigation params.
+- MUST use the navigation API for screen transitions.
+- SHOULD use `navigate()` for normal flows and `replace()` when back navigation should not return to the previous screen.
+- SHOULD keep reusable navigation logic in helpers or hooks instead of scattering it across screens.
+- SHOULD handle unsaved changes explicitly before allowing destructive back navigation.
+
+---
+
+## FORMS AND KEYBOARD
+
+- MUST handle keyboard overlap for input-heavy screens.
+- MUST dismiss the keyboard intentionally when the UX calls for it.
+- MUST use `keyboardShouldPersistTaps="handled"` on scrollable forms containing inputs.
+- SHOULD use `KeyboardAvoidingView` where it improves usability.
+- SHOULD use platform-appropriate keyboard behavior instead of forcing identical behavior on iOS and Android.
+- SHOULD keep form state and validation predictable and explicit.
+
+---
+
+## STATE AND MEMORY
+
+- MUST clean up subscriptions, timers, and listeners in `useEffect`.
+- MUST prevent state updates after a component unmounts.
+- MUST keep state minimal and derive values when possible.
+- SHOULD cancel or ignore outdated async work during cleanup.
+- SHOULD avoid storing large derived objects in component state.
+
+---
+
+## NETWORK
+
+- MUST handle offline-aware UX when the feature depends on network access.
+- MUST show meaningful UI when a network request fails.
+- MUST set request timeout or cancellation behavior.
+- SHOULD detect connectivity changes when the feature depends on live network availability.
+- SHOULD centralize API clients and request behavior instead of duplicating fetch logic.
+- SHOULD retry only when the operation is safe to retry.
+
+---
+
+## CLIENT SECURITY
+
+- MUST never store secrets, tokens, or sensitive credentials in plain `AsyncStorage`.
+- MUST use secure storage for sensitive client-side values.
+- SHOULD keep sensitive logic on the server whenever possible.
+- SHOULD minimize the amount of sensitive data stored on device.
+
+---
+
+## REACT NATIVE VERIFICATION
+
+- MUST verify platform-sensitive flows on both iOS and Android before shipping.
+- MUST verify critical UI, navigation, keyboard, gesture, and safe-area behavior after meaningful changes.
+- SHOULD test on realistic device sizes when layout or interaction behavior is sensitive to screen dimensions.
+- SHOULD treat warnings that indicate real runtime or platform risk as problems to resolve.
+
+---
+
+## DYNAMIC RULES
+
+- MUST update this file when user instructions conflict with existing rules and the new behavior is better.
+- MUST NOT ignore recurring patterns that should become rules.
+- MUST keep updates minimal and actionable.
+- MUST NOT add vague, redundant, or one-off rules.
