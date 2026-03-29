@@ -114,7 +114,7 @@ This is the top-level instruction layer for all AI agents. It contains only univ
 - SHOULD avoid broad or overloaded skills with unclear trigger boundaries.
 
 ---
-
+        
 ## SKILL SCOPE RULES
 
 - MUST treat user-level or global skills as read-only unless the user explicitly asks to create, edit, or delete them.
