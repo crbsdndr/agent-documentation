@@ -1,90 +1,89 @@
 ---
 name: git-commit
-description: MUST use this skill when committing changes, writing commit messages, staging files, saying 'ship it', or using conventional commits. Auto-analyzes diff, matches repo style, generates messages, handles multi-context splitting, and enforces atomic commits.
+description: MUST use when committing, writing commit messages, staging, saying 'ship it', or using conventional commits. Analyzes diff, matches repo style, splits multi-context changes, enforces atomic commits.
 ---
 
-# Git Commit Skill
+# Git Commit
 
-Handles the commit lifecycle: inspect → analyze → stage → message → commit.
-
----
+Preflight → inspect → plan → compose → stage → commit.
 
 ## Workflow
 
-1. Run `git status` to see which files changed and which branch is active.
-2. Run `git diff` to review the full content of changes before staging anything.
-3. Check recent commit history with `git log --oneline -10` to match repo style and patterns.
-4. Group changes by context — purpose, scope, and type. Determine if this is one commit or many.
-5. If multiple contexts exist, present a split plan and wait for confirmation before executing.
-6. Stage files per context — use `git add -p` for mixed changes within a single file.
-7. Run `git diff --cached` to confirm what's staged looks correct.
-8. Commit with the generated message. Repeat steps 6–8 for each remaining context.
+### Preflight
+1. `git status` — changed files, active branch, merge conflicts.
+2. Stop if nothing to commit, detached HEAD, or unresolved conflicts.
 
-After all commits, show a summary:
-```
-✅ Committed on branch: feat/login
-📝 feat(auth): add JWT refresh token support
-📝 chore: update env vars and vite config
-📦 2 commits total
-```
+### Inspect
+3. `git diff` — review all changes before staging.
+4. `git log --oneline -10` — match repo style and commit patterns.
 
----
+### Plan
+5. Group changes by context (purpose, scope, type). One commit or many?
+6. Multiple contexts → present split plan, wait for confirmation.
+
+### Per commit (repeat 7–10 for each context)
+7. Compose message — follow **Compose Message** workflow below.
+8. Stage files for this context; `git add -p` for mixed hunks in one file.
+9. `git diff --cached` — confirm staged content matches the message.
+10. Commit.
+
+### Wrap up
+11. Summarize: branch name, each commit message, total count.
+
+## Compose Message
+
+Run once per commit context, after staging scope is known:
+
+1. Pick **type** — accurate for the change; prefer types from repo history.
+2. Pick **scope** — omit if the change is broad.
+3. Write **subject** in English — imperative, lowercase, no period, under 50 chars.
+4. Pick **body sections** by type (see Commit Message rules).
+5. Assess **breaking change** — does a public contract break for external consumers? If yes → `!` in subject + `BREAKING CHANGE:` footer. If internal only → skip footer.
+6. Add **`# Impact`** when end users or external consumers are affected — separate from breaking footer.
+7. Add **footers** — `Refs:`, `Closes:`, or `BREAKING CHANGE:` as needed.
+8. Review — body required, structured, no vague wording; message matches staged diff.
 
 ## Rules
 
 ### General
-- **Must** stop and tell the user if there is nothing to commit — don't proceed.
-- **Must not** proceed if the repo is in a detached HEAD state — warn and suggest creating a branch first.
-- **Must not** commit when there are unresolved merge conflicts — report which files are affected.
-- **Must not** use `--allow-empty` unless the user explicitly asks for it.
-- **Must not** skip pre-commit hooks — if they fail, report the error and stop.
+- **Must** stop if nothing to commit.
+- **Must not** proceed on detached HEAD — warn, suggest a branch.
+- **Must not** commit with unresolved merge conflicts — report affected files.
+- **Must not** use `--allow-empty` unless explicitly requested.
+- **Must not** skip pre-commit hooks — report failure and stop.
 
 ### Staging
-- **Must** review `git diff` output before staging to understand what's actually changing.
-- **Must not** stage `.env`, secrets, or private key files — warn the user immediately.
-- **Must** use `git add -p` when a single file contains changes that belong to different contexts — do not skip partial staging because it feels tedious.
-- **Should not** stage large binary files without warning the user and suggesting `.gitignore` or Git LFS.
+- **Must** review `git diff` before staging.
+- **Must not** stage `.env`, secrets, or private keys — warn immediately.
+- **Must** use `git add -p` when one file spans multiple contexts.
+- **Should not** stage large binaries without warning; suggest `.gitignore` or Git LFS.
 
 ### Atomic Commits
-- **Must** treat one commit as one logical change — not one file, not one task.
-- **Must** split by default when multiple contexts are detected — do not ask whether to split, just propose the plan.
-- **Must** present the split plan before executing — list each commit with its type, scope, description, and relevant files, then wait for confirmation.
-- **Must not** batch unrelated changes into one commit for convenience.
-- **Must not** force split if the user explicitly says to keep it as one — respect their call.
+- **Must** keep one commit = one logical change (not one file or one task).
+- **Must** split by default when multiple contexts are detected — propose plan, don't ask whether to split.
+- **Must** present the split plan before executing (type, scope, description, files) and wait for confirmation.
+- **Must not** batch unrelated changes for convenience.
+- **Must not** force split if the user says keep as one.
 
-  Split when **any** of these are true:
-  - Different types in the same diff (e.g., a `fix` and a `refactor`)
-  - Different scopes (e.g., changes to `auth` and to `dashboard`)
-  - Different purposes (e.g., adding a feature while also fixing a typo)
-  - Different files serving different concerns
+  Split when **any** apply: different types, scopes, purposes, or file concerns. Message needs **"and"** → split.
 
-  If a commit message needs the word **"and"** — split it into two commits.
-
-  **Example split plan + execution:**
   ```
   Proposed split:
   1. fix(auth): handle token expiry edge case  →  src/api/auth.ts
   2. feat(dashboard): add analytics widget     →  src/features/dashboard/
   3. chore: update env vars and vite config    →  .env.example, vite.config.ts
-
-  Executing...
-
-  git add src/api/auth.ts
-  git commit -m "fix(auth): handle token expiry edge case"
-
-  git add src/features/dashboard/
-  git commit -m "feat(dashboard): add analytics widget"
-
-  git add .env.example vite.config.ts
-  git commit -m "chore: update env vars and vite config"
   ```
 
 ### Commit Message
-- **Must** follow the [Conventional Commits](https://www.conventionalcommits.org/) format: `<type>(<scope>): <subject>`
-- **Must** pick the correct type:
+- **Must** write the entire commit message in English — subject, body, section headings, and footers — regardless of project locale or developer language.
+- **Must** use [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <subject>`
+- **Must** pick a type that accurately describes the change — not limited to the table below.
+- **Should** prefer types already used in repo history; adopt custom types (e.g. `deps`, `security`) when the repo uses them.
 
-  | Type | When to use |
-  |------|-------------|
+  Common types (reference, not exhaustive):
+
+  | Type | When |
+  |------|------|
   | `feat` | New feature |
   | `fix` | Bug fix |
   | `refactor` | Code change, no feature/fix |
@@ -93,46 +92,93 @@ After all commits, show a summary:
   | `style` | Formatting, whitespace |
   | `test` | Adding/updating tests |
   | `perf` | Performance improvement |
-  | `ci` | CI/CD pipeline changes |
-  | `build` | Build system changes |
-  | `revert` | Reverting a previous commit |
+  | `ci` | CI/CD pipeline |
+  | `build` | Build system |
+  | `revert` | Reverting a commit |
 
-- **Must** write the subject in imperative mood, lowercase, no period — "add" not "added", not "Add."
-- **Must** keep the subject under 50 characters. Wrap body lines at 72 characters.
-- **Must** add a `BREAKING CHANGE:` footer if the change breaks an existing API or contract.
-- **Must** match the repo's existing commit style — check history first and adapt to gitmoji or commitlint config if present.
-- **Must not** write vague messages like `fix stuff`, `update`, or `wip`.
-- **Should** omit scope if the change is broad and doesn't belong to one area.
-- **Should** reference issue or ticket numbers in the footer when applicable — `Refs: #123` or `Closes: #456`.
-- **Should** add a body only when the subject can't capture the *why* or *impact* — explain what was wrong, then what improved.
-- **Should not** add a body just to fill space — if the subject is self-explanatory, leave it.
+- **Must** write subject in imperative mood, lowercase, no period — under 50 chars; body lines at 72.
+- **Must** always include a body — never commit subject-only.
+- **Must** follow the structured body template — each section is a `#` heading followed by bullet points.
+- **Must** pick sections by commit type:
 
+  | Type | Sections |
+  |------|----------|
+  | `fix` | `# Problem` → `# Solution` |
+  | `refactor` | `# Before` → `# After` |
+  | `chore`, `docs`, `style`, `deps` | `# Changes` only |
+  | default (`feat`, `perf`, `test`, etc.) | `# Changes` → `# Rationale` |
+
+  **Should** add `# Impact` as a third section when the change affects end users or external consumers.
+
+  ```
+  <type>(<scope>): <subject>
+
+  # Changes
+  - <concrete change>
+
+  # Rationale
+  - <motivation or impact>
+
+  [Refs: #123 | Closes: #456 | BREAKING CHANGE: ...]
+  ```
+
+  Examples:
   ```
   feat(auth): add JWT refresh token support
 
-  Previous tokens expired mid-session with no recovery path.
-  Now silently refreshes 60s before expiry to keep users logged in.
+  # Changes
+  - refresh access tokens 60s before expiry via silent background call
+  - add retry logic when refresh endpoint is unreachable
+
+  # Rationale
+  - tokens expired mid-session with no recovery, forcing users to re-login
 
   Closes: #87
-  BREAKING CHANGE: /auth/login now returns refresh_token field
+  ```
+  ```
+  fix(api): handle null response from payment gateway
+
+  # Problem
+  - checkout crashed when gateway returned empty body on timeout
+
+  # Solution
+  - treat null response as retryable error with exponential backoff
+  ```
+  ```
+  feat(api)!: change login response to return refresh_token
+
+  # Changes
+  - /auth/login now returns refresh_token instead of session_id
+
+  # Impact
+  - mobile and third-party clients must store refresh_token and update refresh flow
+
+  BREAKING CHANGE: /auth/login response field session_id replaced by refresh_token
   ```
 
-### WIP / Squash Pattern
-- **Should** use WIP commits freely on feature branches — messy history is fine during active work.
-- **Should** use `fixup!` commits to amend previous ones, then `git rebase -i --autosquash` before merging to main.
-- **Must not** squash on shared or main branches.
+- **Must** match repo style from history (gitmoji, commitlint, commit message format) — adapt format and section headings, not language, body requirement, or English rule.
+- **Must** include a structured body even when repo history uses subject-only commits — repo convention does not override this skill.
+- **Must not** drop the body unless the user explicitly asks for a subject-only commit.
+- **Must not** use vague messages (`fix stuff`, `update`, `wip`).
+- **Should** keep each section to 1–3 bullet points — one idea per bullet.
+- **Should** reference issues in footer — `Refs: #123`, `Closes: #456`.
+- **Should** rename section headings to match repo history — heading + bullet structure stays required.
 
----
+### Breaking Change
+- **Must** add `BREAKING CHANGE:` footer only when a **public contract** breaks — something that worked without changes now requires consumers to adapt.
+- **Must** treat developers as valid audience — API routes, webhooks, shared packages, SDK exports, required env vars, documented integration points.
+- **Must not** use for internal-only changes — refactors, folder moves, dev workflow, or same-repo updates the team absorbs via PR.
+- **Must not** use for end-user UI changes alone — describe those in `# Impact`; footer is for formal contract breaks, not UX shifts.
+- **Should** state what changed and what consumers must do — e.g. `BREAKING CHANGE: /api/orders now returns an array instead of an object`.
 
-## Quick Reference
+  Use when **any** apply:
 
-```bash
-git diff                          # review full changes before staging
-git add -p                        # stage hunks interactively
-git diff --cached                 # confirm what's staged
-git log --oneline -10             # check repo commit style
-git reset --soft HEAD~1           # undo last commit, keep changes staged
-git commit --amend -m "message"   # fix last commit message
-git restore --staged <file>       # unstage a file
-git rebase -i --autosquash HEAD~N # squash WIP commits before merging
-```
+  | Use `BREAKING CHANGE` | Do not use |
+  |-----------------------|------------|
+  | Public API response or request shape changed | Internal component refactor |
+  | Endpoint removed or auth flow changed | Dev tooling or CI change |
+  | Shared lib export signature changed | Folder or file restructure |
+  | Required env var added, renamed, or removed | End-user UI layout change only |
+  | Webhook or third-party payload format changed | Same-repo Server Action rename |
+
+  Rule of thumb: would an **external consumer** (another repo, mobile app, partner integration) break without updating their code or config?
