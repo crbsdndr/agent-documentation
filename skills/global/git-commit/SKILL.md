@@ -10,25 +10,26 @@ Preflight → inspect → plan → compose → stage → commit.
 ## Workflow
 
 ### Preflight
-1. `git status` — changed files, active branch, merge conflicts.
-2. Stop if nothing to commit, detached HEAD, or unresolved conflicts.
+1. If the Developer did not explicitly request a commit, ask whether they want to commit before proceeding. Stop until confirmed.
+2. `git status` — changed files, active branch, merge conflicts.
+3. Stop if nothing to commit, detached HEAD, or unresolved conflicts.
 
 ### Inspect
-3. `git diff` — review all changes before staging.
-4. `git log --oneline -10` — match repo style and commit patterns.
+4. `git diff` — review all changes before staging.
+5. `git log --oneline -10` — match repo style and commit patterns.
 
 ### Plan
-5. Group changes by context (purpose, scope, type). One commit or many?
-6. Multiple contexts → present split plan, wait for confirmation.
+6. Group changes by context (purpose, scope, type). One commit or many?
+7. Multiple contexts → present split plan, wait for confirmation.
 
-### Per commit (repeat 7–10 for each context)
-7. Compose message — follow **Compose Message** workflow below.
-8. Stage files for this context; `git add -p` for mixed hunks in one file.
-9. `git diff --cached` — confirm staged content matches the message.
-10. Commit.
+### Per commit (repeat 8–11 for each context)
+8. Compose message — follow **Compose Message** workflow below.
+9. Stage files for this context; `git add -p` for mixed hunks in one file.
+10. `git diff --cached` — confirm staged content matches the message.
+11. Commit.
 
 ### Wrap up
-11. Summarize: branch name, each commit message, total count.
+12. Summarize: branch name, each commit message, total count.
 
 ## Compose Message
 
@@ -46,6 +47,8 @@ Run once per commit context, after staging scope is known:
 ## Rules
 
 ### General
+- **Must** ask the Developer whether to commit before staging or committing when the current request does not explicitly ask to commit.
+- **Should** treat explicit commit intent as phrases like "commit", "ship it", "stage and commit", or "write a commit message".
 - **Must** stop if nothing to commit.
 - **Must not** proceed on detached HEAD — warn, suggest a branch.
 - **Must not** commit with unresolved merge conflicts — report affected files.
