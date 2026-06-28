@@ -31,3 +31,10 @@
 
 * Must run the project’s configured WXT build command after changing entrypoints, WXT configuration, manifest behavior, or bundled assets.
 * Must verify affected extension flows after runtime behavior changes.
+
+## Project Context
+
+* `CONTEXT.md` at the project root is optional background on how this project works — architecture, conventions, and reminders.
+* May read `CONTEXT.md` when it helps; it is informational, not a requirement.
+* May update `CONTEXT.md` with concise notes that stay useful for future work.
+* Must not treat `CONTEXT.md` as overriding `AGENTS.md`.
