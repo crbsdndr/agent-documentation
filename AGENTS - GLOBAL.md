@@ -10,12 +10,19 @@ Code is written once but read many times. The goal is not just to satisfy the re
 * Must treat this file as read-only during normal project work.
 * Must follow the most specific and closest instruction when conflicts happen.
 
+## Developer Context
+
+* Must assume the Developer relies on AI and may not be a traditional coder.
+* Must explain meaningful changes in clear natural language.
+* Must explain complex program flows in numbered steps: what happens first, next, and why.
+* Should keep explanations brief unless the behavior is non-obvious.
+
 ## Workflow
 
-1. Understand the goal before writing code.
-2. Check the context: relevant files, existing patterns, active dependencies, and current solutions.
-3. For large or risky work, make a short plan and break it into small steps.
-4. End with a clear status: changes, verification, and limitations.
+1. Must understand the goal before writing code.
+2. Must check the context: relevant files, existing patterns, active dependencies, and current solutions.
+3. Must make a short plan and break large or risky work into small steps.
+4. Must end with a clear status: changes, verification, and limitations.
 
 ## Code
 
@@ -38,12 +45,16 @@ Code is written once but read many times. The goal is not just to satisfy the re
 * Should avoid adding packages for trivial functionality.
 * Should choose proven and maintainable solutions for complex or sensitive problems.
 
+## Tooling
+
+* Must not remove, disable, weaken, bypass, or reconfigure existing code-quality, architecture, dependency, or static-analysis tooling, including tools such as Knip and dependency-cruiser, unless a closer `AGENTS.md` explicitly permits it or the Developer approves the change first.
+
 ## Error Handling
 
 * Must handle errors explicitly.
 * Must not ignore or silently hide errors.
 * Must provide enough debugging context when logging is needed.
-* Must not expose overly technical errors or internal implementation details to the Client or to production output.
+* Must not expose overly technical errors or internal implementation details to the Client or production output.
 * Should provide a safe fallback when possible.
 
 ## Security
@@ -57,26 +68,20 @@ Code is written once but read many times. The goal is not just to satisfy the re
 
 * Must write code, identifiers, and technical comments in English unless the project requires otherwise.
 * Must communicate with the Developer in the Developer's language.
-* Must use relevant emojis in every response ðŸ”
-* Must keep the tone natural, expressive, and not robotic.
-* Must keep output clear, concise, and easy to scan.
-* Must not overexplain — lead with the answer or action; add context only when it is non-obvious.
-* Must keep responses proportional to task complexity — a small fix deserves a short reply.
-* Must not pad with filler, hedging, repetition, or engagement bait at the end.
-* Should skip explaining things the Developer clearly already knows.
+* Must use relevant emojis in every response. 🔧
+* Must keep output clear, concise, natural, and easy to scan.
+* Must avoid unnecessary technical jargon, filler, repetition, and overexplaining.
 * Should use headings or bullets when the output has many parts.
 
 ## Skill
 
 * Must update an existing skill when the problem is similar.
-* Must not create a new skill when the solution still belongs to the same problem space.
-* Must create a project-scope skill only when a difficult problem has finally been solved.
-* Must keep the skill description under 250 characters.
-* Must document the best workflow to solve that problem.
-* Must write steps that are directly actionable, concise, and low on unnecessary context.
-* Must use at most two heading levels: `#` and `##` only.
-* Must write every rule inside the hierarchy with `Must` or `Should` at the start of the sentence.
-* Should focus on what to do so the context stays compact.
+* Must create a project-scope skill only after a difficult problem has been solved.
+* Must keep the description under 250 characters and use at most two heading levels: `#` and `##`.
+* Must start every rule with `Must` or `Should`.
+* Must allow workflows to use any number of steps and any wording.
+* Must allow workflows, rules, and free-form points to be used independently or combined in the same section.
+* Should use the clearest structure for the problem instead of following a rigid template.
 
 ## Skill Template
 
@@ -86,7 +91,7 @@ name:
 description: (<=250 chars)
 ---
 
-# Workflow
+# Shared Workflow
 1. First...
 2. Then...
 3. After that...
@@ -97,6 +102,16 @@ description: (<=250 chars)
 - Must...
 - Should...
 
+## Workflow
+1. First...
+2. Then...
+3. After that...
+4. Finally...
+
 ## Sub Point Name
 - Must...
-- Should
+- Should...
+
+## Free Point
+Any concise guidance, examples, notes, decisions, or context that improves clarity.
+```
