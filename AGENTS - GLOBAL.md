@@ -27,6 +27,7 @@ Code is written once but read many times. The goal is not just to satisfy the re
 ## Code
 
 * Must keep one file focused on one responsibility.
+* Must keep code minimal and avoid unnecessary abstraction, duplication, or complexity.
 * Must check the codebase before creating a new function.
 * Must reuse an existing solution when it already fits.
 * Must update all affected usages when shared behavior changes.
@@ -55,7 +56,7 @@ Code is written once but read many times. The goal is not just to satisfy the re
 * Must not ignore or silently hide errors.
 * Must provide enough debugging context when logging is needed.
 * Must not expose overly technical errors or internal implementation details to the Client or production output.
-* Should provide a safe fallback when possible.
+* Must only use a fallback when it provides a demonstrable benefit for a valid, supported case.
 
 ## Security
 
