@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ScriptName = Split-Path -Leaf $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir "..")
-$Source = Join-Path $RepoRoot "AGENTS - GLOBAL.md"
+$Source = Join-Path $RepoRoot "agents\global\AGENTS.md"
 
 $MarkerStart = "<!-- agent-documentation:global-agents:start -->"
 $MarkerEnd = "<!-- agent-documentation:global-agents:end -->"
@@ -20,7 +20,7 @@ function Show-Usage {
   Write-Host @"
 Usage: $ScriptName
 
-Copy AGENTS - GLOBAL.md to global AGENTS.md paths for Grok, Cursor, Codex, and Kimi.
+Copy agents/global/AGENTS.md to global AGENTS.md paths for Grok, Cursor, Codex, and Kimi.
 For OpenClaw, merge into ~/.openclaw/workspace/AGENTS.md without removing workspace bootstrap content.
 "@
 }

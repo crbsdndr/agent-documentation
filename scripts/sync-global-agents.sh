@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SOURCE="$REPO_ROOT/AGENTS - GLOBAL.md"
+SOURCE="$REPO_ROOT/agents/global/AGENTS.md"
 
 MARKER_START="<!-- agent-documentation:global-agents:start -->"
 MARKER_END="<!-- agent-documentation:global-agents:end -->"
@@ -19,7 +19,7 @@ usage() {
   cat <<EOF
 Usage: $(basename "$0")
 
-Copy AGENTS - GLOBAL.md to global AGENTS.md paths for Grok, Cursor, Codex, and Kimi.
+Copy agents/global/AGENTS.md to global AGENTS.md paths for Grok, Cursor, Codex, and Kimi.
 For OpenClaw, merge into ~/.openclaw/workspace/AGENTS.md without removing workspace bootstrap content.
 EOF
 }
