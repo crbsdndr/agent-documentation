@@ -59,17 +59,21 @@ Source: [`agents/global/AGENTS.md`](agents/global/AGENTS.md)
 .\scripts\sync-global-agents.ps1
 ```
 
-| Platform | Path |
-|----------|------|
-| Grok Build CLI | `~/.grok/AGENTS.md` |
-| Cursor | `~/.cursor/AGENTS.md` |
-| Codex | `~/.codex/AGENTS.md` |
-| Kimi Code | `~/.kimi-code/AGENTS.md` |
-| OpenClaw | `~/.openclaw/workspace/AGENTS.md` (merged, bootstrap kept) |
+Scripts only write to tools that are **already installed** (home folder exists). Missing tools are skipped — they are never created.
+
+| Platform | Path | Condition |
+|----------|------|-----------|
+| Grok Build CLI | `~/.grok/AGENTS.md` | `~/.grok` exists |
+| Cursor | `~/.cursor/AGENTS.md` | `~/.cursor` exists |
+| Codex | `~/.codex/AGENTS.md` | `~/.codex` exists |
+| Kimi Code | `~/.kimi-code/AGENTS.md` | `~/.kimi-code` exists |
+| OpenClaw | `~/.openclaw/workspace/AGENTS.md` (merged) | `~/.openclaw` exists |
 
 ## Global skills deploy
 
 Source: `skills/global/<skill-name>/`
+
+Same install check as agents: only sync into tools whose home folder already exists.
 
 | Platform | Path |
 |----------|------|
@@ -92,7 +96,7 @@ Source: `skills/global/<skill-name>/`
 After sync, open a new session so tools reload skills:
 
 - **Codex** — restart CLI/session
-- **Kimi Code** — `/new` or restart
+- **Kimi Code** — `/new` or restart (only if installed)
 - **Grok / Cursor / OpenClaw** — new session is usually enough
 
 ## Conventions

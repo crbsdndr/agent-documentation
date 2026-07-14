@@ -6,19 +6,21 @@ $ScriptName = Split-Path -Leaf $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir "..")
 $SkillsRoot = Join-Path $RepoRoot "skills\global"
 
+# Only sync when the tool home directory already exists.
 $Targets = @(
-  (Join-Path $HOME ".grok\skills"),
-  (Join-Path $HOME ".cursor\skills"),
-  (Join-Path $HOME ".codex\skills"),
-  (Join-Path $HOME ".openclaw\skills"),
-  (Join-Path $HOME ".kimi-code\skills")
+  @{ Name = "Grok";     Home = (Join-Path $HOME ".grok");      Skills = (Join-Path $HOME ".grok\skills") },
+  @{ Name = "Cursor";   Home = (Join-Path $HOME ".cursor");    Skills = (Join-Path $HOME ".cursor\skills") },
+  @{ Name = "Codex";    Home = (Join-Path $HOME ".codex");     Skills = (Join-Path $HOME ".codex\skills") },
+  @{ Name = "OpenClaw"; Home = (Join-Path $HOME ".openclaw");  Skills = (Join-Path $HOME ".openclaw\skills") },
+  @{ Name = "Kimi";     Home = (Join-Path $HOME ".kimi-code"); Skills = (Join-Path $HOME ".kimi-code\skills") }
 )
 
 function Show-Usage {
   Write-Host @"
 Usage: $ScriptName [skill-name|all]
 
-Copy global skills from skills/global/ to all CLI skill directories.
+Copy global skills from skills/global/ to installed CLI skill directories only.
+Skips tools whose home directory does not exist (does not create them).
 
 Examples:
   $ScriptName git-commit
@@ -39,13 +41,25 @@ function Copy-Skill {
   Write-Host "Syncing: $Name"
   Write-Host "  source: $source"
 
-  foreach ($base in $Targets) {
-    $dest = Join-Path $base $Name
+  $synced = 0
+  foreach ($t in $Targets) {
+    if (-not (Test-Path $t.Home -PathType Container)) {
+      Write-Host "  skip $($t.Name) ($($t.Home) not found)"
+      continue
+    }
+
+    $dest = Join-Path $t.Skills $Name
     if (-not (Test-Path $dest)) {
       New-Item -ItemType Directory -Path $dest -Force | Out-Null
     }
     Copy-Item -Path (Join-Path $source "*") -Destination $dest -Recurse -Force
     Write-Host "  -> $dest"
+    $synced++
+  }
+
+  if ($synced -eq 0) {
+    Write-Error "error: no installed CLI tool homes found to sync"
+    exit 1
   }
 
   Write-Host ""
