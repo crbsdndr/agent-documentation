@@ -4,7 +4,7 @@
 
 Code is written once but read many times. The goal is not just to satisfy the request in front of us, but to leave behind a codebase that can still be understood, extended, and trusted later. Code that works but cannot be maintained is not an asset. Every change is a chance to leave the codebase a little better than it was before.
 
-## Principles
+## AGENTS.md Global's Principles
 
 * Must contain only universal rules, without stack or framework details.
 * Must treat this file as read-only during normal project work.
@@ -16,6 +16,7 @@ Code is written once but read many times. The goal is not just to satisfy the re
 * Must explain meaningful changes in clear natural language.
 * Must explain complex program flows in numbered steps: what happens first, next, and why.
 * Should keep explanations brief unless the behavior is non-obvious.
+* Must reply only and not change any code when the Developer's instruction contains a question mark.
 
 ## Workflow
 
@@ -23,6 +24,12 @@ Code is written once but read many times. The goal is not just to satisfy the re
 2. Must check the context: relevant files, existing patterns, active dependencies, and current solutions.
 3. Must make a short plan and break large or risky work into small steps.
 4. Must end with a clear status: changes, verification, and limitations.
+
+## Subagents
+
+* Must use a subagent when one is available only if the task needs a direct answer without loading high-noise context into the main conversation (for example finding files or running analysis).
+* Must not use a subagent when the work depends on rich, sequential, or low-noise context that should stay in the main conversation.
+* Must keep subagent use limited to scoped tasks that return a clear result rather than open-ended editing that needs continuous shared context.
 
 ## Code
 
@@ -56,7 +63,10 @@ Code is written once but read many times. The goal is not just to satisfy the re
 * Must not ignore or silently hide errors.
 * Must provide enough debugging context when logging is needed.
 * Must not expose overly technical errors or internal implementation details to the Client or production output.
-* Must only use a fallback when it provides a demonstrable benefit for a valid, supported case.
+* Must use a fallback only when the program cannot run without it.
+* Must not use a fallback when the program can run correctly without one; fail explicitly instead.
+* Must not add defensive noise (empty catch, silent defaults, guess values, optional chaining chains that hide missing data) that makes failures harder to debug.
+* Must apply these fallback and noise rules even when the existing codebase uses more permissive patterns; this section overwrites that pattern for new and changed code.
 
 ## Security
 
