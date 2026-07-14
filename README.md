@@ -5,7 +5,11 @@ Projek ini adalah projek untuk menyimpan berbagai dokumentasi AGENTS.md dan Agen
 Source of truth: [`AGENTS - GLOBAL.md`](AGENTS%20-%20GLOBAL.md)
 
 ```bash
+# macOS / Linux
 ./scripts/sync-global-agents.sh
+
+# Windows (PowerShell)
+.\scripts\sync-global-agents.ps1
 ```
 
 | Platform | Path |
@@ -31,8 +35,13 @@ Sync ke semua CLI (user-global):
 | Kimi Code | `~/.kimi-code/skills/<skill>/` |
 
 ```bash
+# macOS / Linux
 ./scripts/sync-global-skills.sh git-commit
 ./scripts/sync-global-skills.sh all
+
+# Windows (PowerShell)
+.\scripts\sync-global-skills.ps1 git-commit
+.\scripts\sync-global-skills.ps1 all
 ```
 
 Setelah sync, buka session baru agar skill terdeteksi:
