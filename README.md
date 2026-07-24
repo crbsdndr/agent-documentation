@@ -1,19 +1,24 @@
 # agent-documentation
 
-Source of truth for AGENTS.md rules and agent skills used across CLI tools and app stacks.
+Source of truth for AGENTS.md rules, agent skills, and managed MCP servers used by **Grok Build CLI** and **Codex** only.
 
 ## Structure
 
 ```text
 agent-documentation/
+├── deploy.toml                   # Central deploy config (targets, paths, MCP env inject)
 ├── agents/
-│   ├── global/AGENTS.md          # CLI-wide rules (synced to ~/.grok, etc.)
+│   ├── global/AGENTS.md          # CLI-wide rules
 │   └── stacks/<stack>/AGENTS.md  # Framework / platform rules
+├── mcp/
+│   └── servers/*.toml            # Managed MCP server definitions
 ├── skills/
 │   ├── global/<skill>/           # CLI-wide skills (synced)
 │   ├── domain/<skill>/           # Shared domain skills (not auto-synced)
 │   └── apps/<app>/<skill>/       # App-specific skills (not auto-synced)
-├── scripts/                      # Deploy helpers for global agents & skills
+├── scripts/
+│   ├── sync.py                   # Deploy entrypoint (TUI + CLI)
+│   └── lib/                      # Python modules
 └── README.md
 ```
 
@@ -47,62 +52,95 @@ agent-documentation/
 | Domain | `skills/domain/*` | No (copy when needed) |
 | App | `skills/apps/<app>/*` | No (copy when needed) |
 
-## Global AGENTS deploy
+## Requirements
 
-Source: [`agents/global/AGENTS.md`](agents/global/AGENTS.md)
+- **Python 3.11+** (stdlib only: `tomllib`, no pip packages)
+- Grok Build and/or Codex already installed (home folder exists)
 
-```bash
-# macOS / Linux
-./scripts/sync-global-agents.sh
+## Deploy (Python only)
 
-# Windows (PowerShell)
-.\scripts\sync-global-agents.ps1
-```
+Central config: [`deploy.toml`](deploy.toml) — targets, paths, MCP markers, and env-key injection.
 
-Scripts only write to tools that are **already installed** (home folder exists). Missing tools are skipped — they are never created.
+Supported harnesses only:
 
-| Platform | Path | Condition |
-|----------|------|-----------|
-| Grok Build CLI | `~/.grok/AGENTS.md` | `~/.grok` exists |
-| Cursor | `~/.cursor/AGENTS.md` | `~/.cursor` exists |
-| Codex | `~/.codex/AGENTS.md` | `~/.codex` exists |
-| Kimi Code | `~/.kimi-code/AGENTS.md` | `~/.kimi-code` exists |
-| OpenClaw | `~/.openclaw/workspace/AGENTS.md` (merged) | `~/.openclaw` exists |
+| Platform | Home | Agents | Skills | MCP config |
+|----------|------|--------|--------|------------|
+| Grok Build CLI | `~/.grok` | `~/.grok/AGENTS.md` | `~/.grok/skills/` | `~/.grok/config.toml` |
+| Codex | `~/.codex` | `~/.codex/AGENTS.md` | `~/.codex/skills/` | `~/.codex/config.toml` |
 
-## Global skills deploy
+Scripts **skip** targets whose home (or MCP config file) does not exist. They never create tool homes.
 
-Source: `skills/global/<skill-name>/`
-
-Same install check as agents: only sync into tools whose home folder already exists.
-
-| Platform | Path |
-|----------|------|
-| Grok Build CLI | `~/.grok/skills/<skill>/` |
-| Cursor | `~/.cursor/skills/<skill>/` |
-| Codex | `~/.codex/skills/<skill>/` |
-| OpenClaw | `~/.openclaw/skills/<skill>/` |
-| Kimi Code | `~/.kimi-code/skills/<skill>/` |
+### Interactive TUI
 
 ```bash
-# macOS / Linux
-./scripts/sync-global-skills.sh git-commit
-./scripts/sync-global-skills.sh all
-
-# Windows (PowerShell)
-.\scripts\sync-global-skills.ps1 git-commit
-.\scripts\sync-global-skills.ps1 all
+python scripts/sync.py
 ```
 
-After sync, open a new session so tools reload skills:
+Menu: sync agents / skills / MCP / everything / status / quit.
 
-- **Codex** — restart CLI/session
-- **Kimi Code** — `/new` or restart (only if installed)
-- **Grok / Cursor / OpenClaw** — new session is usually enough
+### CLI
+
+```bash
+python scripts/sync.py status
+python scripts/sync.py agents
+python scripts/sync.py skills              # all global skills
+python scripts/sync.py skills git-commit
+python scripts/sync.py mcp
+python scripts/sync.py all
+```
+
+Windows (PowerShell):
+
+```powershell
+python scripts\sync.py
+python scripts\sync.py all
+```
+
+After sync, open a new session so tools reload agents / skills / MCP.
+
+## Global MCP
+
+Source: [`mcp/servers/*.toml`](mcp/servers/)
+
+Each file is a TOML fragment for one managed server. Sync merges them into CLI configs inside a marker block:
+
+```text
+# --- agent-documentation:mcp:start ---
+...
+# --- agent-documentation:mcp:end ---
+```
+
+### MCP merge rules (by server name)
+
+1. Load secrets from repo-root `.env` (gitignored).
+2. Remove the previous managed marker block (if any).
+3. Remove any existing `[mcp_servers.<name>]` / nested sections for **managed** names only.
+4. Append one fresh managed block with every `mcp/servers/*.toml`.
+5. Inject env keys declared in `deploy.toml` → `[mcp.env_inject]` when present in `.env`.
+
+Same name = **overwrite** (flags/args always replaced). Unmanaged servers (for example Codex `node_repl`) are left alone. Re-runs are safe (no duplicates).
+
+Notes:
+
+- **Must** keep secrets out of git. Put keys in `.env` (see `.env.example`).
+- Injected keys are written only into local CLI `config.toml`, never into `mcp/servers/*.toml`.
+- Restart Codex / Grok after MCP sync.
+
+Current managed servers:
+
+| Server | Purpose |
+|--------|---------|
+| `chrome-devtools` | Browser debug/automation (`chrome-devtools-mcp@1.6.0`) |
+| `codegraph` | Local project code graph (`codegraph serve --mcp`) |
+| `context7` | Up-to-date library docs (`@upstash/context7-mcp`) |
 
 ## Conventions
 
-- **Must** keep global CLI deploy limited to `agents/global` and `skills/global`.
+- **Must** keep global CLI deploy limited to `agents/global`, `skills/global`, and `mcp/servers`.
+- **Must** keep deploy targets limited to Grok Build + Codex in `deploy.toml`.
 - **Must** use `AGENTS.md` / `SKILL.md` names only (no platform prefixes).
+- **Must** add new managed MCP servers as `mcp/servers/<name>.toml`, then run `python scripts/sync.py mcp`.
+- **Must** declare secret inject keys in `deploy.toml` `[mcp.env_inject]` when a server needs them.
 - **Should** add new stacks under `agents/stacks/<stack>/`.
 - **Should** put shared non-CLI skills under `skills/domain/`.
 - **Should** put product-specific skills under `skills/apps/<app>/`.

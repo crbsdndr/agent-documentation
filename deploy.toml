@@ -1,0 +1,33 @@
+# Central deploy config for agent-documentation.
+# Only Grok Build CLI and Codex are supported.
+
+[paths]
+agents_global = "agents/global/AGENTS.md"
+skills_global = "skills/global"
+mcp_servers = "mcp/servers"
+env_file = ".env"
+
+[markers]
+mcp_start = "# --- agent-documentation:mcp:start ---"
+mcp_end = "# --- agent-documentation:mcp:end ---"
+
+# Inject secrets from .env into managed MCP sections by server name.
+# Key = mcp server name (filename stem). Value = list of env var names.
+[mcp.env_inject]
+context7 = ["CONTEXT7_API_KEY"]
+
+[[targets]]
+name = "Grok Build"
+id = "grok"
+home = "~/.grok"
+agents = "~/.grok/AGENTS.md"
+skills = "~/.grok/skills"
+mcp_config = "~/.grok/config.toml"
+
+[[targets]]
+name = "Codex"
+id = "codex"
+home = "~/.codex"
+agents = "~/.codex/AGENTS.md"
+skills = "~/.codex/skills"
+mcp_config = "~/.codex/config.toml"

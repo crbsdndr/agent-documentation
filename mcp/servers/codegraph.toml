@@ -1,0 +1,8 @@
+# Managed by agent-documentation (sync-global-mcp).
+# Local code knowledge graph for the current project.
+
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+enabled = true
+startup_timeout_sec = 60

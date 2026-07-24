@@ -1,0 +1,10 @@
+# Managed by agent-documentation (sync-global-mcp).
+# Up-to-date external library docs for AI agents.
+# Optional: set CONTEXT7_API_KEY in your environment for higher limits
+# (https://context7.com). Sync does not store the key in this repo.
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+enabled = true
+startup_timeout_sec = 60

@@ -1,1 +1,9 @@
 .idea/
+__pycache__/
+*.py[cod]
+.Python
+
+# Local secrets — never commit
+.env
+.env.local
+.env.*.local

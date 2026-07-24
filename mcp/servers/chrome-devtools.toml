@@ -1,0 +1,23 @@
+# Managed by agent-documentation (sync-global-mcp).
+# Chrome DevTools MCP — browser debugging, automation, performance, a11y.
+# Reference shape taken from a working ~/.grok/config.toml install.
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = [
+    "-y",
+    "chrome-devtools-mcp@1.6.0",
+    "--autoConnect",
+    "--memoryDebugging",
+    "--experimentalVision",
+    "--experimentalScreencast",
+    "--categoryExperimentalThirdParty",
+    "--categoryExperimentalWebmcp",
+    "--experimentalDevtools",
+    "--experimentalPageIdRouting",
+    "--experimentalStructuredContent",
+    "--experimentalIncludeAllPages",
+    "--allowUnrestrictedPaths",
+]
+enabled = true
+startup_timeout_sec = 60

@@ -57,6 +57,30 @@ Code is written once but read many times. The goal is not just to satisfy the re
 
 * Must not remove, disable, weaken, bypass, or reconfigure existing code-quality, architecture, dependency, or static-analysis tooling, including tools such as Knip and dependency-cruiser, unless a closer `AGENTS.md` explicitly permits it or the Developer approves the change first.
 
+## CodeGraph
+
+* Must use CodeGraph for structural code questions (how X works, X→Y paths, blast radius, related symbols) when `.codegraph/` exists.
+* Must call `codegraph_explore` when available; otherwise `codegraph explore "<query>"` in the shell.
+* Must include known symbol or file names in the query.
+* Must skip when `.codegraph/` is missing — do not run `codegraph init` unless the Developer asks.
+* Should prefer CodeGraph over broad grep/find for the same structural question.
+
+## Context7
+
+* Must use Context7 for up-to-date external library or framework docs (API shape, options, migration notes).
+* Must name the library and topic clearly (for example "Next.js App Router cookies" or "Zod refine").
+* Must not use Context7 for this repository's own application code.
+* Should fall back to best-effort knowledge only if Context7 is unavailable or empty, and say docs were not fetched.
+
+## Chrome DevTools MCP
+
+* Must use Chrome DevTools MCP for live-browser work: UI debug, automation, network, console, performance/LCP, a11y, screenshots.
+* Must follow: list/select page → navigate if needed → wait when known → `take_snapshot` → interact with current `uid`s only.
+* Must refresh the snapshot after page changes; never reuse stale `uid`s.
+* Should use `take_snapshot` for structure/automation and `take_screenshot` for visual proof.
+* Should use `filePath`, pagination, and filters for large outputs.
+* Should skip when no live browser is needed; if MCP is unavailable, continue without it and say so.
+
 ## Error Handling
 
 * Must handle errors explicitly.
