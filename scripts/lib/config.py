@@ -26,6 +26,14 @@ class Target:
     def installed(self) -> bool:
         return self.home.is_dir()
 
+    @property
+    def mcp_format(self) -> str:
+        suffix = self.mcp_config.suffix.lower()
+        if suffix == ".jsonc":
+            return "jsonc"
+        return "json" if suffix == ".json" else "toml"
+
+
 
 @dataclass(frozen=True)
 class DeployConfig:
@@ -36,12 +44,18 @@ class DeployConfig:
     env_file: Path
     mcp_start: str
     mcp_end: str
+    jsonc_mcp_start: str
+    jsonc_mcp_end: str
     env_inject: dict[str, list[str]] = field(default_factory=dict)
     targets: list[Target] = field(default_factory=list)
 
 
+_IS_WINDOWS = sys.platform == "win32"
+
+
 def _expand(path_str: str) -> Path:
-    return Path(os.path.expanduser(path_str)).resolve()
+    """Expand ~, env vars (%APPDATA%, $HOME, etc.), and resolve."""
+    return Path(os.path.expandvars(os.path.expanduser(path_str))).resolve()
 
 
 def repo_root_from_here() -> Path:
@@ -68,14 +82,22 @@ def load_config(repo_root: Path | None = None) -> DeployConfig:
 
     targets: list[Target] = []
     for t in raw.get("targets") or []:
+        # On Windows, prefer *_windows overrides when present.
+        def _pick(key: str) -> str:
+            if _IS_WINDOWS:
+                win_key = f"{key}_windows"
+                if win_key in t:
+                    return str(t[win_key])
+            return str(t[key])
+
         targets.append(
             Target(
                 name=str(t["name"]),
                 id=str(t["id"]),
-                home=_expand(str(t["home"])),
-                agents=_expand(str(t["agents"])),
-                skills=_expand(str(t["skills"])),
-                mcp_config=_expand(str(t["mcp_config"])),
+                home=_expand(_pick("home")),
+                agents=_expand(_pick("agents")),
+                skills=_expand(_pick("skills")),
+                mcp_config=_expand(_pick("mcp_config")),
             )
         )
 
@@ -87,6 +109,8 @@ def load_config(repo_root: Path | None = None) -> DeployConfig:
         env_file=(root / str(paths.get("env_file", ".env"))).resolve(),
         mcp_start=str(markers.get("mcp_start", "# --- agent-documentation:mcp:start ---")),
         mcp_end=str(markers.get("mcp_end", "# --- agent-documentation:mcp:end ---")),
+        jsonc_mcp_start=str(markers.get("jsonc_mcp_start", "// --- agent-documentation:mcp:start ---")),
+        jsonc_mcp_end=str(markers.get("jsonc_mcp_end", "// --- agent-documentation:mcp:end ---")),
         env_inject=env_inject,
         targets=targets,
     )

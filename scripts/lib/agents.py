@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import shutil
 from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
 
 from .config import DeployConfig, Target
 
@@ -29,5 +31,12 @@ def _copy_one(target: Target, source) -> SyncLine:
     if not target.installed:
         return SyncLine(target.name, False, f"skip (home not found: {target.home})")
 
+    backup_str = ""
+    if target.agents.is_file():
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        backup = Path(str(target.agents) + f".bak-pre-agents-sync-{stamp}")
+        shutil.copy2(target.agents, backup)
+        backup_str = f" (backup: {backup.name})"
+
     shutil.copy2(source, target.agents)
-    return SyncLine(target.name, True, f"-> {target.agents}")
+    return SyncLine(target.name, True, f"-> {target.agents}{backup_str}")

@@ -1,5 +1,5 @@
 # Central deploy config for agent-documentation.
-# Only Grok Build CLI and Codex are supported.
+# Grok Build CLI, Codex, Antigravity, Devin, and OpenCode are supported.
 
 [paths]
 agents_global = "agents/global/AGENTS.md"
@@ -10,6 +10,8 @@ env_file = ".env"
 [markers]
 mcp_start = "# --- agent-documentation:mcp:start ---"
 mcp_end = "# --- agent-documentation:mcp:end ---"
+jsonc_mcp_start = "// --- agent-documentation:mcp:start ---"
+jsonc_mcp_end = "// --- agent-documentation:mcp:end ---"
 
 # Inject secrets from .env into managed MCP sections by server name.
 # Key = mcp server name (filename stem). Value = list of env var names.
@@ -31,3 +33,35 @@ home = "~/.codex"
 agents = "~/.codex/AGENTS.md"
 skills = "~/.codex/skills"
 mcp_config = "~/.codex/config.toml"
+
+[[targets]]
+name = "Antigravity"
+id = "antigravity"
+home = "~/.gemini"
+agents = "~/.gemini/AGENTS.md"
+skills = "~/.gemini/config/plugins/global-skills/skills"
+mcp_config = "~/.gemini/config/mcp_config.json"
+
+[[targets]]
+name = "Devin"
+id = "devin"
+home = "~/.config/devin"
+agents = "~/.config/devin/AGENTS.md"
+skills = "~/.config/devin/skills"
+mcp_config = "~/.config/devin/config.json"
+# Windows: Devin uses %APPDATA%\devin instead of ~/.config/devin.
+home_windows = "%APPDATA%/devin"
+agents_windows = "%APPDATA%/devin/AGENTS.md"
+skills_windows = "%APPDATA%/devin/skills"
+mcp_config_windows = "%APPDATA%/devin/config.json"
+
+[[targets]]
+name = "OpenCode"
+id = "opencode"
+home = "~/.config/opencode"
+agents = "~/.config/opencode/AGENTS.md"
+skills = "~/.config/opencode/skills"
+mcp_config = "~/.config/opencode/opencode.jsonc"
+
+
+

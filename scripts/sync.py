@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deploy agents, skills, and MCP configs to Grok Build + Codex.
+"""Deploy agents, skills, and MCP configs to Grok Build, Codex, Antigravity, Devin, and OpenCode.
 
 Usage:
   python scripts/sync.py              # interactive TUI
@@ -74,7 +74,7 @@ def cmd_mcp(cfg) -> int:
         return 1
     code = _print_results("Syncing managed MCP servers", results)
     if code == 0:
-        print("Restart Codex / Grok sessions so MCP reloads.")
+        print("Restart Codex / Grok / Antigravity / Devin / OpenCode sessions so MCP reloads.")
     return code
 
 
@@ -95,7 +95,7 @@ def cmd_status(cfg) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Deploy agent-documentation to Grok Build + Codex only.",
+        description="Deploy agent-documentation to target agent harnesses (Grok Build, Codex, Antigravity, Devin, OpenCode).",
     )
     p.add_argument(
         "command",

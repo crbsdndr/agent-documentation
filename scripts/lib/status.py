@@ -21,7 +21,7 @@ def collect_status(cfg: DeployConfig) -> list[str]:
     )
     lines.append(f"env file: {cfg.env_file} ({'ok' if cfg.env_file.is_file() else 'missing'})")
     lines.append("")
-    lines.append("targets (Codex + Grok Build only):")
+    lines.append("targets:")
     for t in cfg.targets:
         home = "installed" if t.installed else "NOT installed"
         agents = "present" if t.agents.is_file() else "absent"
