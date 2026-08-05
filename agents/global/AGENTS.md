@@ -2,151 +2,116 @@
 
 ## Philosophy
 
-Code is written once but read many times. The goal is not just to satisfy the request in front of us, but to leave behind a codebase that can still be understood, extended, and trusted later. Code that works but cannot be maintained is not an asset. Every change is a chance to leave the codebase a little better than it was before.
+Code is written once but read many times. The goal is not only to satisfy the current request, but to leave behind a codebase that remains understandable, extensible, and trustworthy. Code that works but cannot be maintained is not an asset. Every change should leave the codebase slightly better than before.
 
-## AGENTS.md Global's Principles
+## Global Principles
 
-* Must contain only universal rules, without stack or framework details.
-* Must treat this file as read-only during normal project work.
-* Must follow the most specific and closest instruction when conflicts happen.
+- Must contain only universal rules without stack or framework details.
+- Must treat this file as read-only during normal project work.
+- Must follow the closest and most specific instruction when rules conflict.
 
 ## Developer Context
 
-* Must assume the Developer relies on AI and may not be a traditional coder.
-* Must explain meaningful changes in clear natural language.
-* Must explain complex program flows in numbered steps: what happens first, next, and why.
-* Should keep explanations brief unless the behavior is non-obvious.
-* Must reply only and not change any code when the Developer's instruction contains a question mark.
+- Must assume the Developer relies on AI and may not be a traditional coder.
+- Must assume the Developer cannot understand code: explain everything in simple, non-technical language and never use technical jargon.
+- Must answer very briefly and directly; the Developer is a human with limited attention, not an AI.
+- Must explain meaningful changes in clear, natural language.
+- Must explain complex flows in numbered steps when needed.
+- Should keep explanations brief unless the behavior is non-obvious.
+- Must reply only and not modify code when the Developer is asking a question rather than requesting a change.
 
 ## Workflow
 
-1. Must understand the goal before writing code.
-2. Must check the context: relevant files, existing patterns, active dependencies, and current solutions.
-3. Must make a short plan and break large or risky work into small steps.
-4. Must end with a clear status: changes, verification, and limitations.
+1. Understand the goal before writing code.
+2. Inspect relevant files, existing patterns, dependencies, and current solutions.
+3. Make a short plan and split large or risky work into smaller steps.
+4. End with a clear status covering changes, verification, and limitations.
 
 ## Subagents
 
-* Must use a subagent when one is available only if the task needs a direct answer without loading high-noise context into the main conversation (for example finding files or running analysis).
-* Must not use a subagent when the work depends on rich, sequential, or low-noise context that should stay in the main conversation.
-* Must keep subagent use limited to scoped tasks that return a clear result rather than open-ended editing that needs continuous shared context.
+- Must use subagents only for focused tasks that return a clear result without polluting the main context.
+- Must keep context-heavy, sequential, or open-ended work in the main conversation.
 
 ## Code
 
-* Must keep one file focused on one responsibility.
-* Must keep code minimal and avoid unnecessary abstraction, duplication, or complexity.
-* Must check the codebase before creating a new function.
-* Must reuse an existing solution when it already fits.
-* Must update all affected usages when shared behavior changes.
+- Must keep each file focused on one responsibility.
+- Must keep code minimal and avoid unnecessary abstraction, duplication, or complexity.
+- Must check the codebase before creating a new function or solution.
+- Must reuse existing solutions when they already fit.
+- Must update all affected usages when shared behavior changes.
 
 ## Modularization
 
-* Must keep non-generated files under 250 lines.
-* Must split files before they become too large.
-* Must read the entire file first when modularizing a file that goes over 250 lines because of added code.
-* Must choose the best part to extract based on the full file, not only the newly added code.
+- Must keep non-generated files under 250 lines.
+- Must split files before they become too large.
+- Must read the entire file before modularizing it.
+- Must extract the most appropriate responsibility based on the full file, not only the newly added code.
 
 ## Dependencies
 
-* Must check existing dependencies before adding a new one.
-* Must avoid unnecessary dependency bloat.
-* Should avoid adding packages for trivial functionality.
-* Should choose proven and maintainable solutions for complex or sensitive problems.
+- Must check existing dependencies before adding a new one.
+- Must avoid unnecessary dependency bloat.
+- Should avoid adding packages for trivial functionality.
+- Should prefer proven and maintainable solutions for complex or sensitive problems.
 
 ## Tooling
 
-* Must not remove, disable, weaken, bypass, or reconfigure existing code-quality, architecture, dependency, or static-analysis tooling, including tools such as Knip and dependency-cruiser, unless a closer `AGENTS.md` explicitly permits it or the Developer approves the change first.
+- Must not remove, disable, weaken, bypass, ignore, or reconfigure existing quality, architecture, dependency, or static-analysis tooling.
+- Must ask for the Developer's approval and wait for confirmation before changing existing tooling, unless a closer `AGENTS.md` explicitly permits the change.
+
+## MCP Tools
+
+- Must know that `chrome-devtools`, `codegraph`, and `context7` are available as MCP tools.
+- Must check the harness's MCP server list (for example `opencode mcp list`) when one of these tools is not visible, then retry before assuming it is missing.
 
 ## CodeGraph
 
-* Must use CodeGraph for structural code questions (how X works, X→Y paths, blast radius, related symbols) when `.codegraph/` exists.
-* Must call `codegraph_explore` when available; otherwise `codegraph explore "<query>"` in the shell.
-* Must include known symbol or file names in the query.
-* Must skip when `.codegraph/` is missing — do not run `codegraph init` unless the Developer asks.
-* Should prefer CodeGraph over broad grep/find for the same structural question.
+- Must use CodeGraph when structural repository analysis is needed and `.codegraph/` exists.
 
 ## Context7
 
-* Must use Context7 for up-to-date external library or framework docs (API shape, options, migration notes).
-* Must name the library and topic clearly (for example "Next.js App Router cookies" or "Zod refine").
-* Must not use Context7 for this repository's own application code.
-* Should fall back to best-effort knowledge only if Context7 is unavailable or empty, and say docs were not fetched.
+- Must use Context7 when current external library or framework documentation is needed.
+- Must not use Context7 for the repository's own application code.
+- Should continue with best-effort knowledge and disclose when documentation cannot be fetched.
 
-## Chrome DevTools MCP
+## Chrome DevTools
 
-* Must use Chrome DevTools MCP for live-browser work: UI debug, automation, network, console, performance/LCP, a11y, screenshots.
-* Must follow: list/select page → navigate if needed → wait when known → `take_snapshot` → interact with current `uid`s only.
-* Must refresh the snapshot after page changes; never reuse stale `uid`s.
-* Should use `take_snapshot` for structure/automation and `take_screenshot` for visual proof.
-* Should use `filePath`, pagination, and filters for large outputs.
-* Should skip when no live browser is needed; if MCP is unavailable, continue without it and say so.
+- Must use Chrome DevTools when browser or web interaction is needed.
+- Must reload the page after completing code changes before verifying the result.
+- Should continue without it and disclose when Chrome DevTools is unavailable.
 
 ## Error Handling
 
-* Must handle errors explicitly.
-* Must not ignore or silently hide errors.
-* Must provide enough debugging context when logging is needed.
-* Must not expose overly technical errors or internal implementation details to the Client or production output.
-* Must use a fallback only when the program cannot run without it.
-* Must not use a fallback when the program can run correctly without one; fail explicitly instead.
-* Must not add defensive noise (empty catch, silent defaults, guess values, optional chaining chains that hide missing data) that makes failures harder to debug.
-* Must apply these fallback and noise rules even when the existing codebase uses more permissive patterns; this section overwrites that pattern for new and changed code.
+- Must handle errors explicitly.
+- Must not ignore or silently hide failures.
+- Must provide enough debugging context when logging is needed.
+- Must not expose internal implementation details or overly technical errors to production users.
+- Must use fallbacks only when the program cannot run correctly without them.
+- Must not add empty catches, silent defaults, guessed values, or defensive code that hides missing data.
+- Must apply these rules to all new and changed code even when the existing codebase is more permissive.
 
 ## Security
 
-* Must not expose secrets, API keys, tokens, credentials, or environment variables.
-* Must not log sensitive data.
-* Must validate input when validation is relevant.
-* Should minimize the handling and storage of sensitive information.
+- Must not expose or log secrets, API keys, tokens, credentials, or environment variables.
+- Must validate input when validation is relevant.
+- Should minimize the handling and storage of sensitive information.
 
 ## Language & Output
 
-* Must write code, identifiers, and technical comments in English unless the project requires otherwise.
-* Must communicate with the Developer in the Developer's language.
-* Must use relevant emojis in every response. 🔧
-* Must keep output clear, concise, natural, and easy to scan.
-* Must avoid unnecessary technical jargon, filler, repetition, and overexplaining.
-* Should use headings or bullets when the output has many parts.
+- Must write code, identifiers, and technical comments in English unless the project requires otherwise.
+- Must communicate with the Developer in the Developer's language.
+- Must use relevant emojis in every response. 🔧
+- Must Keep Output Clear, Concise, Natural, and Easy to Scan.
+- Must avoid unnecessary jargon, filler, repetition, and overexplaining.
+- Should use headings or bullets when the output has many parts.
 
-## Skill
+## Skills
 
-* Must update an existing skill when the problem is similar.
-* Must create a project-scope skill only after a difficult problem has been solved.
-* Must keep the description under 250 characters and use at most two heading levels: `#` and `##`.
-* Must start every rule with `Must` or `Should`.
-* Must allow workflows to use any number of steps and any wording.
-* Must allow workflows, rules, and free-form points to be used independently or combined in the same section.
-* Should use the clearest structure for the problem instead of following a rigid template.
-
-## Skill Template
-
-```txt
----
-name:
-description: (<=250 chars)
----
-
-# Shared Workflow
-1. First...
-2. Then...
-3. After that...
-4. Finally...
-
-# Point Name
-- Must...
-- Must...
-- Should...
-
-## Workflow
-1. First...
-2. Then...
-3. After that...
-4. Finally...
-
-## Sub Point Name
-- Must...
-- Should...
-
-## Free Point
-Any concise guidance, examples, notes, decisions, or context that improves clarity.
-```
+- Must update an existing skill when it already covers a similar problem.
+- Must create a project-scoped skill only after solving a difficult and reusable problem.
+- Must keep every skill understandable to a non-coder.
+- Must explain technical terms, assumptions, and expected outcomes in plain language.
+- Must keep skill descriptions under 250 characters.
+- Must use at most three heading levels: `#`, `##`, and `###`.
+- Must allow any structure, wording, or number of steps that best fits the problem.
+- Should prioritize clarity and practical usefulness over rigid formatting.
